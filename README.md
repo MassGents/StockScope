@@ -4,12 +4,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StockScope</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>StockScope - Live Stock Tracker</title>
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #0a0a0a;
       color: #e0e0e0;
     }
@@ -31,78 +30,92 @@
     }
     section {
       padding: 2rem;
+      max-width: 800px;
+      margin: auto;
     }
     h1, h2 {
       color: #0ff;
     }
-    .container {
-      max-width: 1000px;
-      margin: auto;
-    }
-    iframe {
-      width: 100%;
-      height: 500px;
-      border: none;
+    .card {
+      background-color: #1a1a1a;
+      padding: 1.5rem;
+      margin-top: 1rem;
       border-radius: 10px;
+      box-shadow: 0 0 10px #0ff3;
+    }
+    input, button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      margin-top: 1rem;
+      border: none;
+      border-radius: 5px;
+    }
+    input {
+      width: 150px;
+      margin-right: 0.5rem;
+    }
+    button {
+      background-color: #0ff;
+      color: #000;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #00cccc;
     }
   </style>
 </head>
 <body>
   <nav>
     <a href="#home">Home</a>
-    <a href="#news">Market News</a>
-    <a href="#prices">Current Prices</a>
-    <a href="#picks">Top Picks</a>
-    <a href="#trends">Trends</a>
-    <a href="#tools">Tools</a>
+    <a href="#prices">Track Stocks</a>
     <a href="#about">About</a>
   </nav>
 
-  <section id="home" class="container">
+  <section id="home">
     <h1>Welcome to StockScope</h1>
-    <p>Your all-in-one dashboard for stock market insights, news, and opportunities.</p>
+    <p>Track live stock prices in real time. Enter any stock symbol (e.g., AAPL, MSFT, TSLA).</p>
   </section>
 
-  <section id="news" class="container">
-    <h2>Latest Market News</h2>
-    <iframe src="https://www.marketwatch.com/latest-news" title="MarketWatch News"></iframe>
+  <section id="prices">
+    <h2>Live Stock Price Lookup</h2>
+    <input type="text" id="stockSymbol" placeholder="Enter symbol" />
+    <button onclick="fetchStock()">Track</button>
+
+    <div class="card" id="stockCard" style="display:none;">
+      <h3 id="stockName"></h3>
+      <p>Current Price: $<span id="stockPrice">Loading...</span></p>
+    </div>
   </section>
 
-  <section id="prices" class="container">
-    <h2>Live Stock Prices</h2>
-    <iframe src="https://finance.yahoo.com/" title="Yahoo Finance"></iframe>
+  <section id="about">
+    <h2>About</h2>
+    <p>This site fetches real-time stock prices using the Twelve Data API. It's simple, fast, and free to use.</p>
   </section>
 
-  <section id="picks" class="container">
-    <h2>Stocks to Watch</h2>
-    <p>These picks are curated based on market momentum and analyst sentiment:</p>
-    <ul>
-      <li>NVIDIA (NVDA)</li>
-      <li>Microsoft (MSFT)</li>
-      <li>Apple (AAPL)</li>
-      <li>Amazon (AMZN)</li>
-      <li>Tesla (TSLA)</li>
-    </ul>
-  </section>
+  <script>
+    async function fetchStock() {
+      const symbol = document.getElementById('stockSymbol').value.toUpperCase();
+      const apiKey = "YOUR_API_KEY_HERE";
+      const url = `https://api.twelvedata.com/price?symbol=${symbol}&apikey=${apiKey}`;
 
-  <section id="trends" class="container">
-    <h2>Trending Sectors</h2>
-    <ul>
-      <li>Artificial Intelligence</li>
-      <li>Semiconductors</li>
-      <li>Green Energy</li>
-      <li>Biotech</li>
-    </ul>
-  </section>
+      document.getElementById('stockCard').style.display = 'block';
+      document.getElementById('stockName').innerText = `${symbol} Stock Price`;
+      document.getElementById('stockPrice').innerText = 'Loading...';
 
-  <section id="tools" class="container">
-    <h2>Investment Tools</h2>
-    <p>Coming soon: Calculators, screeners, and real-time analysis tools to guide your investing decisions.</p>
-  </section>
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-  <section id="about" class="container">
-    <h2>About StockScope</h2>
-    <p>This is a free, beginner-friendly stock tracker designed to give you insights fast without the fluff.</p>
-  </section>
+        if (data.price) {
+          document.getElementById('stockPrice').innerText = data.price;
+        } else {
+          document.getElementById('stockPrice').innerText = "Invalid symbol or API limit reached.";
+        }
+      } catch (error) {
+        document.getElementById('stockPrice').innerText = "Error fetching data.";
+        console.error(error);
+      }
+    }
+  </script>
 </body>
 </html>
